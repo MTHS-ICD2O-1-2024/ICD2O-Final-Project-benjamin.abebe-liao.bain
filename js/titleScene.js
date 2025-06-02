@@ -13,7 +13,6 @@ class TitleScene extends Phaser.Scene {
    */
   constructor() {
     super({ key: 'titleScene' })
-
     this.titleSceneBackgroundImage = null
     this.titleSceneText = null
     this.titleSceneTextStyle = {
@@ -51,7 +50,7 @@ class TitleScene extends Phaser.Scene {
     this.titleSceneText = this.add
       .text(1920 / 2, 1080 / 2 + 350, 'Space Aliens', this.titleSceneTextStyle)
       .setOrigin(0.5)
-
+    
     // Use delayedCall instead of update() to avoid linter issue
     this.time.delayedCall(6000, () => {
       this.scene.start('menuScene')
