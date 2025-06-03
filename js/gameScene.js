@@ -92,41 +92,41 @@ class GameScene extends Phaser.Scene {
 
   update (time, delta) {
     // called 60 times a second
-  
+
     const keyUpObj = this.input.keyboard.addKey('UP')
     const keyLeftObj = this.input.keyboard.addKey('LEFT')
     const keyRightObj = this.input.keyboard.addKey('RIGHT')
     const keyDownObj = this.input.keyboard.addKey('DOWN')
     const keySpaceObj = this.input.keyboard.addKey('SPACE')
-  
+
     if (keyLeftObj.isDown === true) {
       this.ship.x -= 15
       if (this.ship.x < 0) {
         this.ship.x = 0
       }
     }
-  
+
     if (keyRightObj.isDown === true) {
       this.ship.x += 15
       if (this.ship.x > 1920) {
         this.ship.x = 1920
       }
     }
-  
+
     if (keyUpObj.isDown === true) {
       this.ship.y -= 15
       if (this.ship.y < 0) {
         this.ship.y = 0
       }
     }
-  
+
     if (keyDownObj.isDown === true) {
       this.ship.y += 15
       if (this.ship.y > 1080) {
         this.ship.y = 1080
       }
     }
-  
+
     if (keySpaceObj.isDown === true) {
       if (this.fireMissile === false) {
         // fire missile
@@ -136,18 +136,18 @@ class GameScene extends Phaser.Scene {
         this.sound.play('laser')
       }
     }
-  
+
     if (keySpaceObj.isUp === true) {
       this.fireMissile = false
     }
-  
+
     this.missileGroup.children.each(function (item) {
       item.y = item.y - 15
       if (item.y < 0) {
         item.destroy()
       }
     })
-  }  
+  }
 }
 
 export default GameScene
