@@ -13,8 +13,8 @@ class GameScene extends Phaser.Scene {
     const alienXLocation = Math.floor(Math.random() * 1920) + 1
     let alienXVelocity = Math.floor(Math.random() * 50) + 1
     alienXVelocity *= Math.round(Math.random()) ? 1 : -1
-    const anAlien = this.physics.add.sprite(alienXLocation, -100, 'alien')
-    anAlien.body.velocity.y = 200
+    const anAlien = this.physics.add.sprite(alienXLocation, -1, 'alien')
+    anAlien.body.velocity.y = 5
     anAlien.body.velocity.x = alienXVelocity
     this.alienGroup.add(anAlien)
   }
@@ -43,6 +43,8 @@ class GameScene extends Phaser.Scene {
     // images
     // this.load.image('starBackground', './assets/starBackground.png')
     this.load.image('ship', './assets/antivirus.png')
+    this.load.image('missile', './assets/lightningbolt.png')
+    this.load.image('alien', './assets/mal.png')
     // this.load.image('missile', './assets/missile.png')
     // this.load.image('alien', './assets/alien.png')
     // sound
@@ -91,12 +93,10 @@ class GameScene extends Phaser.Scene {
   }
 
   update (time, delta) {
-    // called 60 times a second
-
-    const keyUpObj = this.input.keyboard.addKey('UP')
-    const keyLeftObj = this.input.keyboard.addKey('LEFT')
-    const keyRightObj = this.input.keyboard.addKey('RIGHT')
-    const keyDownObj = this.input.keyboard.addKey('DOWN')
+    const keyUpObj = this.input.keyboard.addKey('W')
+    const keyLeftObj = this.input.keyboard.addKey('A')
+    const keyRightObj = this.input.keyboard.addKey('D')
+    const keyDownObj = this.input.keyboard.addKey('S')
     const keySpaceObj = this.input.keyboard.addKey('SPACE')
 
     if (keyLeftObj.isDown === true) {
@@ -129,11 +129,9 @@ class GameScene extends Phaser.Scene {
 
     if (keySpaceObj.isDown === true) {
       if (this.fireMissile === false) {
-        // fire missile
         this.fireMissile = true
         const aNewMissile = this.physics.add.sprite(this.ship.x, this.ship.y, 'missile')
         this.missileGroup.add(aNewMissile)
-        this.sound.play('laser')
       }
     }
 
@@ -147,6 +145,18 @@ class GameScene extends Phaser.Scene {
         item.destroy()
       }
     })
+
+    // Make aliens move toward the player at a constant speed
+this.alienGroup.children.each(function (alien) {
+  const dx = this.ship.x - alien.x
+  const dy = this.ship.y - alien.y
+  const angle = Math.atan2(dy, dx)
+  const speed = 200 // change this number for faster/slower enemies
+
+  alien.body.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed)
+}, this)
+
+
   }
 }
 
