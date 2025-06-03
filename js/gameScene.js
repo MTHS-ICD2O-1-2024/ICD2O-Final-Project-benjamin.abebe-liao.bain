@@ -147,16 +147,14 @@ class GameScene extends Phaser.Scene {
     })
 
     // Make aliens move toward the player at a constant speed
-this.alienGroup.children.each(function (alien) {
-  const dx = this.ship.x - alien.x
-  const dy = this.ship.y - alien.y
-  const angle = Math.atan2(dy, dx)
-  const speed = 200 // change this number for faster/slower enemies
+    this.alienGroup.children.each(function (alien) {
+      const dx = this.ship.x - alien.x
+      const dy = this.ship.y - alien.y
+      const angle = Math.atan2(dy, dx)
+      const speed = 200 // change this number for faster/slower enemies
 
-  alien.body.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed)
-}, this)
-
-
+      alien.body.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed)
+    }, this)
   }
 }
 
