@@ -8,35 +8,15 @@
  * This class is the Game Scene.
  */
 class GameScene extends Phaser.Scene {
-  // create enemy of specific type
-  createEnemy(type = 'type1') {
-    const x = Math.floor(Math.random() * 1920) + 1
-    let speed = 100
-    let health = 1
-    let velocityY = 5
-    let velocityX = 0
-    let texture = 'alien'
-  
-    if (type === 'type1') {
-      health = 3
-      speed = 200
-      velocityX = Math.floor(Math.random() * 50) + 1
-      velocityX *= Math.round(Math.random()) ? 1 : -1
-    } else if (type === 'type2') {
-      health = 5
-      speed = 100
-      velocityX = Math.floor(Math.random() * 20) + 1
-      velocityX *= Math.round(Math.random()) ? 1 : -1
-    }
-  
-    const enemy = this.physics.add.sprite(x, -1, texture)
-    enemy.body.velocity.y = velocityY
-    enemy.body.velocity.x = velocityX
-  
-    enemy.speed = speed
-    enemy.setData('health', health)
-  
-    this.enemyGroup.add(enemy)
+  // create alien
+  createAlien () {
+    const alienXLocation = Math.floor(Math.random() * 1920) + 1
+    let alienXVelocity = Math.floor(Math.random() * 50) + 1
+    alienXVelocity *= Math.round(Math.random()) ? 1 : -1
+    const anAlien = this.physics.add.sprite(alienXLocation, -1, 'alien')
+    anAlien.body.velocity.y = 5
+    anAlien.body.velocity.x = alienXVelocity
+    this.alienGroup.add(anAlien)
   }
 
   /**
@@ -47,6 +27,8 @@ class GameScene extends Phaser.Scene {
 
     this.ship = null
     this.fireMissile = false
+    this.lives = 3
+    this.livesText = null
     this.score = 0
     this.scoreText = null
     this.scoreTextStyle = { font: '65px Arial', fill: '#ffffff', align: 'center' }
@@ -79,46 +61,46 @@ class GameScene extends Phaser.Scene {
 
     this.scoreText = this.add.text(10, 10, 'Score: ' + this.score.toString(), this.scoreTextStyle)
 
+    this.livesText = this.add.text(10, 80, 'Lives: ' + this.lives.toString(), this.scoreTextStyle)
+
     this.ship = this.physics.add.sprite(1920 / 2, 1080 - 100, 'ship')
 
     // create a group for the missiles
     this.missileGroup = this.physics.add.group()
 
-    // create a group for the enemy
-    this.enemyGroup = this.add.group()
+    // create a group for the aliens
+    this.alienGroup = this.add.group()
+    this.createAlien()
 
-    // create some enemies of different types
-    this.createEnemy('type1')
-    this.createEnemy('type2')
-
-    // Collisions between missiles and enemies
-    this.physics.add.collider(this.missileGroup, this.enemyGroup, function (missileCollide, enemyCollide) {
-      let currentHealth = enemyCollide.getData('health')
-      enemyCollide.setData('health', currentHealth - 1)
-      
-      console.log('Enemy health:', currentHealth - 1)
+    // Collisions between missiles and aliens
+    this.physics.add.overlap(this.missileGroup, this.alienGroup, function (missileCollide, alienCollide) {
+      alienCollide.destroy()
       missileCollide.destroy()
+      // this.sound.play('explosion')
       this.score = this.score + 1
       this.scoreText.setText('Score: ' + this.score.toString())
-      if (enemyCollide.health <= 0) {
-        enemyCollide.destroy()
-        // this.sound.play('explosion')
-        const randomType = Math.random() < 0.5 ? 'type1' : 'type2'
-        this.createEnemy(randomType)
-        this.createEnemy(randomType)
-      }
+      this.createAlien()
+      this.createAlien()
     }.bind(this))
 
-    // Collisions between ship and enemies
-    this.physics.add.collider(this.ship, this.enemyGroup, function (shipCollide, enemyCollide) {
+    // Collisions between ship and aliens
+    this.physics.add.overlap(this.ship, this.alienGroup, function (shipCollide, alienCollide) {
       // this.sound.play('bomb')
-      this.physics.pause()
-      enemyCollide.destroy()
-      shipCollide.destroy()
-      this.gameOverText = this.add.text(1920 / 2, 1080 / 2, 'Game Over!\nClick to play again.', this.gameOverTextStyle).setOrigin(0.5)
-      this.gameOverText.setInteractive({ useHandCursor: true })
-      this.gameOverText.on('pointerdown', () => this.scene.start('gameScene'))
-      this.score = 0
+      alienCollide.destroy()
+      this.lives --
+      this.livesText.setText('Lives: ' + this.lives.toString())
+      this.createAlien()
+      this.createAlien()
+      if (this.lives <= 0) {
+        this.physics.pause()
+        alienCollide.destroy()
+        shipCollide.destroy()
+        this.gameOverText = this.add.text(1920 / 2, 1080 / 2, 'Game Over!\nClick to play again.', this.gameOverTextStyle).setOrigin(0.5)
+        this.gameOverText.setInteractive({ useHandCursor: true })
+        this.gameOverText.on('pointerdown', () => this.scene.start('gameScene'))
+        this.score = 0
+        this.lives = 3
+      }
     }.bind(this))
   }
 
@@ -176,15 +158,14 @@ class GameScene extends Phaser.Scene {
       }
     })
 
-    // Make enemies move toward the player at a constant speed
-    this.enemyGroup.children.each(function (enemy) {
-      const dx = this.ship.x - enemy.x
-      const dy = this.ship.y - enemy.y
+    // Make aliens move toward the player at a constant speed
+    this.alienGroup.children.each(function (alien) {
+      const dx = this.ship.x - alien.x
+      const dy = this.ship.y - alien.y
       const angle = Math.atan2(dy, dx)
-    
-      const speed = enemy.speed || 100
-    
-      enemy.body.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed)
+      const speed = 200 // change this number for faster/slower enemies
+
+      alien.body.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed)
     }, this)
   }
 }
