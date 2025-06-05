@@ -19,8 +19,8 @@ class GameScene extends Phaser.Scene {
     this.alienGroup.add(anAlien)
   }
 
-    // spawn a wave of multiple aliens
-    spawnWave (numAliens) {
+  // spawn a wave of multiple aliens
+  spawnWave (numAliens) {
     for (let loopCounter = 0; loopCounter < numAliens; loopCounter++) {
       this.createAlien()
     }
