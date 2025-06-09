@@ -19,6 +19,13 @@ class GameScene extends Phaser.Scene {
     this.alienGroup.add(anAlien)
   }
 
+  // spawn a wave of multiple aliens
+  spawnWave (numAliens) {
+    for (let loopCounter = 0; loopCounter < numAliens; loopCounter++) {
+      this.createAlien()
+    }
+  }
+
   /**
    * This method is the constructor.
    */
@@ -27,6 +34,10 @@ class GameScene extends Phaser.Scene {
 
     this.ship = null
     this.fireMissile = false
+    this.waves = 1
+    this.wavesText = null
+    this.lives = 3
+    this.livesText = null
     this.score = 0
     this.scoreText = null
     this.scoreTextStyle = { font: '65px Arial', fill: '#ffffff', align: 'center' }
@@ -57,7 +68,11 @@ class GameScene extends Phaser.Scene {
     this.background = this.add.image(0, 0, 'starBackground').setScale(2.0)
     this.background.setOrigin(0, 0)
 
+    this.wavesText = this.add.text(1650, 10, 'Wave: ' + this.waves.toString(), this.scoreTextStyle)
+
     this.scoreText = this.add.text(10, 10, 'Score: ' + this.score.toString(), this.scoreTextStyle)
+
+    this.livesText = this.add.text(10, 80, 'Lives: ' + this.lives.toString(), this.scoreTextStyle)
 
     this.ship = this.physics.add.sprite(1920 / 2, 1080 - 100, 'ship')
 
@@ -66,29 +81,38 @@ class GameScene extends Phaser.Scene {
 
     // create a group for the aliens
     this.alienGroup = this.add.group()
-    this.createAlien()
+
+    // Waves system
+    this.spawnWave(this.waves)
 
     // Collisions between missiles and aliens
-    this.physics.add.collider(this.missileGroup, this.alienGroup, function (missileCollide, alienCollide) {
+    this.physics.add.overlap(this.missileGroup, this.alienGroup, function (missileCollide, alienCollide) {
       alienCollide.destroy()
       missileCollide.destroy()
-      this.sound.play('explosion')
+      // this.sound.play('explosion')
       this.score = this.score + 1
       this.scoreText.setText('Score: ' + this.score.toString())
-      this.createAlien()
-      this.createAlien()
     }.bind(this))
 
     // Collisions between ship and aliens
-    this.physics.add.collider(this.ship, this.alienGroup, function (shipCollide, alienCollide) {
-      this.sound.play('bomb')
-      this.physics.pause()
+    this.physics.add.overlap(this.ship, this.alienGroup, function (shipCollide, alienCollide) {
+      // this.sound.play('bomb')
       alienCollide.destroy()
-      shipCollide.destroy()
-      this.gameOverText = this.add.text(1920 / 2, 1080 / 2, 'Game Over!\nClick to play again.', this.gameOverTextStyle).setOrigin(0.5)
-      this.gameOverText.setInteractive({ useHandCursor: true })
-      this.gameOverText.on('pointerdown', () => this.scene.start('gameScene'))
-      this.score = 0
+      this.lives--
+      this.livesText.setText('Lives: ' + this.lives.toString())
+
+      // Reset everything when game ends
+      if (this.lives <= 0) {
+        this.physics.pause()
+        alienCollide.destroy()
+        shipCollide.destroy()
+        this.gameOverText = this.add.text(1920 / 2, 1080 / 2, 'Game Over!\nClick to play again.', this.gameOverTextStyle).setOrigin(0.5)
+        this.gameOverText.setInteractive({ useHandCursor: true })
+        this.gameOverText.on('pointerdown', () => this.scene.start('gameScene'))
+        this.score = 0
+        this.lives = 3
+        this.waves = 1
+      }
     }.bind(this))
   }
 
@@ -155,6 +179,13 @@ class GameScene extends Phaser.Scene {
 
       alien.body.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed)
     }, this)
+
+    // Check for enemies and progress waves if none are left
+    if (this.alienGroup.countActive(true) === 0) {
+      this.waves++
+      this.wavesText.setText('Wave: ' + this.waves)
+      this.spawnWave(this.waves)
+    }
   }
 }
 
