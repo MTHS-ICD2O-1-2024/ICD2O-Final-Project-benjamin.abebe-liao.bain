@@ -18,7 +18,7 @@ class GameScene extends Phaser.Scene {
     anEnemy.body.velocity.x = enemyXVelocity
 
     // Assign enemy hp
-    let randomType = Math.floor(Math.random() * 3) + 1
+    const randomType = Math.floor(Math.random() * 3) + 1
     if (randomType === 1) {
       anEnemy.hp = 1
       anEnemy.speed = 750
@@ -102,10 +102,12 @@ class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.missileGroup, this.enemyGroup, function (missileCollide, enemyCollide) {
       missileCollide.destroy()
       // this.sound.play('explosion')
+      // Reduce HP
       if (enemyCollide.hp > 1) {
-        enemyCollide.hp -= 1  // Reduce HP
+        enemyCollide.hp -= 1
       } else {
-        enemyCollide.destroy() // Destroy if HP is 0 or less
+        // Destroy if HP is 0 or less
+        enemyCollide.destroy()
         this.score += 1
         this.scoreText.setText('Score: ' + this.score.toString())
       }
@@ -136,7 +138,6 @@ class GameScene extends Phaser.Scene {
   }
 
   update (time, delta) {
-
     // Get mouse pointer coordinates
     const pointer = this.input.activePointer
     const dx = pointer.x - this.ship.x
@@ -188,12 +189,12 @@ class GameScene extends Phaser.Scene {
         // Create missile at ship's position
         const aNewMissile = this.physics.add.sprite(this.ship.x, this.ship.y, 'missile')
         this.missileGroup.add(aNewMissile)
-        
+
         // Set missile velocity based on ship's rotation (angle)
         const missileSpeed = 1500
         aNewMissile.body.velocity.x = Math.cos(angle) * missileSpeed
         aNewMissile.body.velocity.y = Math.sin(angle) * missileSpeed
-      
+
         // Optional: rotate missile to face moving direction
         aNewMissile.rotation = angle
       }
