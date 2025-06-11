@@ -162,6 +162,7 @@ class GameScene extends Phaser.Scene {
       }
     }
 
+    // if the user pressed the arrow up button
     if (keyRightObj.isDown === true) {
       this.ship.x += 15
       if (this.ship.x > 1920) {
@@ -169,6 +170,7 @@ class GameScene extends Phaser.Scene {
       }
     }
 
+    // if the user pressed the arrow down button
     if (keyUpObj.isDown === true) {
       this.ship.y -= 15
       if (this.ship.y < 0) {
