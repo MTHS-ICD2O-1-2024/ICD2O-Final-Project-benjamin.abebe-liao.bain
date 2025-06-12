@@ -9,16 +9,27 @@
  */
 class GameScene extends Phaser.Scene {
   // create enemy
-  createEnemy () {
+  createEnemy() {
     const enemyXLocation = Math.floor(Math.random() * 1920) + 1
     let enemyXVelocity = Math.floor(Math.random() * 50) + 1
     enemyXVelocity *= Math.round(Math.random()) ? 1 : -1
-    const anEnemy = this.physics.add.sprite(enemyXLocation, -1, 'enemy')
+
+    const randomType = Math.floor(Math.random() * 3) + 1
+    let texture
+    if (randomType === 1) {
+      texture = 'fastEnemy'
+    } else if (randomType === 2) {
+      texture = 'enemy'
+    } else {
+      texture = 'slowEnemy'
+    }
+
+
+    const anEnemy = this.physics.add.sprite(enemyXLocation, -1, texture)
     anEnemy.body.velocity.y = 5
     anEnemy.body.velocity.x = enemyXVelocity
 
     // Assign enemy hp
-    const randomType = Math.floor(Math.random() * 3) + 1
     if (randomType === 1) {
       anEnemy.hp = 1
       anEnemy.speed = 750
@@ -33,7 +44,7 @@ class GameScene extends Phaser.Scene {
   }
 
   // spawn a wave of multiple enemies
-  spawnWave (numEnemies) {
+  spawnWave(numEnemies) {
     for (let loopCounter = 0; loopCounter < numEnemies; loopCounter++) {
       this.createEnemy()
     }
@@ -42,7 +53,7 @@ class GameScene extends Phaser.Scene {
   /**
    * This method is the constructor.
    */
-  constructor () {
+  constructor() {
     super({ key: 'gameScene' })
 
     this.ship = null
@@ -57,11 +68,11 @@ class GameScene extends Phaser.Scene {
     this.gameOverTextStyle = { font: '65px Arial', fill: '#ff0000', align: 'center' }
   }
 
-  init (data) {
+  init(data) {
     this.cameras.main.setBackgroundColor('#0x5f6e7a')
   }
 
-  preload () {
+  preload() {
     console.log('Game Scene')
 
     // images
@@ -69,15 +80,16 @@ class GameScene extends Phaser.Scene {
     this.load.image('ship', './assets/antivirus.png')
     this.load.image('missile', './assets/lightningbolt.png')
     this.load.image('enemy', './assets/mal.png')
-    // this.load.image('missile', './assets/missile.png')
-    // this.load.image('enemy', './assets/enemy.png')
+    this.load.image('fastEnemy', '/assets/virus.png')
+    this.load.image('slowEnemy', '/assets/ransomware.png')
+
     // sound
-    // this.load.audio('laser', './assets/laser1.wav')
-    // this.load.audio('explosion', './assets/barrelExploding.wav')
-    // this.load.audio('bomb', './assets/bomb.wav')
+    this.load.audio('laser', './assets/laser.wav')
+    this.load.audio('explosion', './assets/explosion.wav')
+    this.load.audio('bomb', './assets/bomb.wav')
   }
 
-  create (data) {
+  create(data) {
     this.background = this.add.image(0, 0, 'starBackground').setScale(2.0)
     this.background.setOrigin(0, 0)
 
@@ -101,7 +113,7 @@ class GameScene extends Phaser.Scene {
     // Collisions between missiles and enemies
     this.physics.add.overlap(this.missileGroup, this.enemyGroup, function (missileCollide, enemyCollide) {
       missileCollide.destroy()
-      // this.sound.play('explosion')
+      this.sound.play('explosion')
       // Reduce HP
       if (enemyCollide.hp > 1) {
         enemyCollide.hp -= 1
@@ -115,7 +127,7 @@ class GameScene extends Phaser.Scene {
 
     // Collisions between ship and enemies
     this.physics.add.overlap(this.ship, this.enemyGroup, function (shipCollide, enemyCollide) {
-      // this.sound.play('bomb')
+      this.sound.play('explosion')
       enemyCollide.destroy()
       this.lives--
       this.livesText.setText('Lives: ' + this.lives.toString())
@@ -137,7 +149,7 @@ class GameScene extends Phaser.Scene {
     }.bind(this))
   }
 
-  update (time, delta) {
+  update(time, delta) {
     // Get mouse pointer coordinates
     const pointer = this.input.activePointer
     const dx = pointer.x - this.ship.x
@@ -162,7 +174,6 @@ class GameScene extends Phaser.Scene {
       }
     }
 
-    // if the user pressed the arrow up button
     if (keyRightObj.isDown === true) {
       this.ship.x += 15
       if (this.ship.x > 1920) {
@@ -170,7 +181,6 @@ class GameScene extends Phaser.Scene {
       }
     }
 
-    // if the user pressed the arrow down button
     if (keyUpObj.isDown === true) {
       this.ship.y -= 15
       if (this.ship.y < 0) {
@@ -191,6 +201,9 @@ class GameScene extends Phaser.Scene {
         // Create missile at ship's position
         const aNewMissile = this.physics.add.sprite(this.ship.x, this.ship.y, 'missile')
         this.missileGroup.add(aNewMissile)
+
+        // Play laser sound
+        this.sound.play('laser')
 
         // Set missile velocity based on ship's rotation (angle)
         const missileSpeed = 1500
