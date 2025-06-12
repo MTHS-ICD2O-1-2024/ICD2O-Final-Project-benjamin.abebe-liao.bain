@@ -65,7 +65,7 @@ class GameScene extends Phaser.Scene {
     console.log('Game Scene')
 
     // images
-    // this.load.image('starBackground', './assets/starBackground.png')
+    this.load.image('starBackground', './assets/background.png')
     this.load.image('ship', './assets/antivirus.png')
     this.load.image('missile', './assets/lightningbolt.png')
     this.load.image('enemy', './assets/mal.png')
@@ -162,6 +162,7 @@ class GameScene extends Phaser.Scene {
       }
     }
 
+    // if the user pressed the arrow up button
     if (keyRightObj.isDown === true) {
       this.ship.x += 15
       if (this.ship.x > 1920) {
@@ -169,6 +170,7 @@ class GameScene extends Phaser.Scene {
       }
     }
 
+    // if the user pressed the arrow down button
     if (keyUpObj.isDown === true) {
       this.ship.y -= 15
       if (this.ship.y < 0) {
