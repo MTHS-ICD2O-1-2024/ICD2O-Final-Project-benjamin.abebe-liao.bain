@@ -83,10 +83,10 @@ class GameScene extends Phaser.Scene {
     this.load.image('slowEnemy', '/assets/ransomware.png')
 
     // sound (using mp3 files now)
-    this.load.audio('laser', './assets/laser.mp3')
-    this.load.audio('explosion', './assets/explosion.mp3')
-    this.load.audio('bomb', './assets/bomb.mp3')
-    this.load.audio('gameover', './assets/gameover.mp3')
+    this.load.audio('laser', './assets/laser.wav')
+    this.load.audio('explosion', './assets/explosion.wav')
+    this.load.audio('bomb', './assets/bomb.wav')
+    this.load.audio('gameover', './assets/gameover.wav')
   }
 
   create (data) {
