@@ -9,7 +9,7 @@
  */
 class GameScene extends Phaser.Scene {
   // create enemy
-  createEnemy() {
+  createEnemy () {
     const enemyXLocation = Math.floor(Math.random() * 1920) + 1
     let enemyXVelocity = Math.floor(Math.random() * 50) + 1
     enemyXVelocity *= Math.round(Math.random()) ? 1 : -1
@@ -23,7 +23,6 @@ class GameScene extends Phaser.Scene {
     } else {
       texture = 'slowEnemy'
     }
-
 
     const anEnemy = this.physics.add.sprite(enemyXLocation, -1, texture)
     anEnemy.body.velocity.y = 5
@@ -44,7 +43,7 @@ class GameScene extends Phaser.Scene {
   }
 
   // spawn a wave of multiple enemies
-  spawnWave(numEnemies) {
+  spawnWave (numEnemies) {
     for (let loopCounter = 0; loopCounter < numEnemies; loopCounter++) {
       this.createEnemy()
     }
@@ -53,7 +52,7 @@ class GameScene extends Phaser.Scene {
   /**
    * This method is the constructor.
    */
-  constructor() {
+  constructor () {
     super({ key: 'gameScene' })
 
     this.ship = null
@@ -68,11 +67,11 @@ class GameScene extends Phaser.Scene {
     this.gameOverTextStyle = { font: '65px Arial', fill: '#ff0000', align: 'center' }
   }
 
-  init(data) {
+  init (data) {
     this.cameras.main.setBackgroundColor('#0x5f6e7a')
   }
 
-  preload() {
+  preload () {
     console.log('Game Scene')
 
     // images
@@ -83,13 +82,14 @@ class GameScene extends Phaser.Scene {
     this.load.image('fastEnemy', '/assets/virus.png')
     this.load.image('slowEnemy', '/assets/ransomware.png')
 
-    // sound
-    this.load.audio('laser', './assets/laser.wav')
-    this.load.audio('explosion', './assets/explosion.wav')
-    this.load.audio('bomb', './assets/bomb.wav')
+    // sound (using mp3 files now)
+    this.load.audio('laser', './assets/laser.mp3')
+    this.load.audio('explosion', './assets/explosion.mp3')
+    this.load.audio('bomb', './assets/bomb.mp3')
+    this.load.audio('gameover', './assets/gameover.mp3')
   }
 
-  create(data) {
+  create (data) {
     this.background = this.add.image(0, 0, 'starBackground').setScale(2.0)
     this.background.setOrigin(0, 0)
 
@@ -135,6 +135,7 @@ class GameScene extends Phaser.Scene {
       // Reset everything when game ends
       if (this.lives <= 0) {
         this.physics.pause()
+        this.sound.play('gameover')
         enemyCollide.destroy()
         shipCollide.destroy()
         this.gameOverText = this.add.text(1920 / 2, 1080 / 2, 'Game Over!\nClick to play again.', this.gameOverTextStyle).setOrigin(0.5)
@@ -149,7 +150,7 @@ class GameScene extends Phaser.Scene {
     }.bind(this))
   }
 
-  update(time, delta) {
+  update (time, delta) {
     // Get mouse pointer coordinates
     const pointer = this.input.activePointer
     const dx = pointer.x - this.ship.x
