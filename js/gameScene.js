@@ -28,7 +28,6 @@ class GameScene extends Phaser.Scene {
     anEnemy.body.velocity.y = 5
     anEnemy.body.velocity.x = enemyXVelocity
 
-    // Assign enemy hp
     if (randomType === 1) {
       anEnemy.hp = 1
       anEnemy.speed = 750
@@ -39,24 +38,20 @@ class GameScene extends Phaser.Scene {
       anEnemy.hp = 3
       anEnemy.speed = 150
     }
+
     this.enemyGroup.add(anEnemy)
   }
 
-  // spawn a wave of multiple enemies
   spawnWave (numEnemies) {
     for (let loopCounter = 0; loopCounter < numEnemies; loopCounter++) {
       this.createEnemy()
     }
   }
 
-  /**
-   * This method is the constructor.
-   */
   constructor () {
     super({ key: 'gameScene' })
 
     this.ship = null
-    this.fireMissile = false
     this.waves = 1
     this.wavesText = null
     this.lives = 3
@@ -74,7 +69,6 @@ class GameScene extends Phaser.Scene {
   preload () {
     console.log('Game Scene')
 
-    // images
     this.load.image('starBackground', './assets/background.png')
     this.load.image('ship', './assets/antivirus.png')
     this.load.image('missile', './assets/lightningbolt.png')
@@ -82,7 +76,6 @@ class GameScene extends Phaser.Scene {
     this.load.image('fastEnemy', '/assets/virus.png')
     this.load.image('slowEnemy', '/assets/ransomware.png')
 
-    // sound (using mp3 files now)
     this.load.audio('laser', './assets/laser.wav')
     this.load.audio('explosion', './assets/explosion.wav')
     this.load.audio('bomb', './assets/bomb.wav')
@@ -94,49 +87,38 @@ class GameScene extends Phaser.Scene {
     this.background.setOrigin(0, 0)
 
     this.wavesText = this.add.text(1650, 10, 'Wave: ' + this.waves.toString(), this.scoreTextStyle)
-
     this.scoreText = this.add.text(10, 10, 'Score: ' + this.score.toString(), this.scoreTextStyle)
-
     this.livesText = this.add.text(10, 80, 'Lives: ' + this.lives.toString(), this.scoreTextStyle)
 
     this.ship = this.physics.add.sprite(1920 / 2, 1080 - 100, 'ship')
 
-    // create a group for the missiles
     this.missileGroup = this.physics.add.group()
-
-    // create a group for the enemies
     this.enemyGroup = this.physics.add.group()
 
-    // Waves system
     this.spawnWave(this.waves)
 
-    // Collisions between missiles and enemies
     this.physics.add.overlap(this.missileGroup, this.enemyGroup, function (missileCollide, enemyCollide) {
       missileCollide.destroy()
       this.sound.play('explosion')
-      // Reduce HP
+
       if (enemyCollide.hp > 1) {
         enemyCollide.hp -= 1
       } else {
-        // Destroy if HP is 0 or less
         enemyCollide.destroy()
         this.score += 1
         this.scoreText.setText('Score: ' + this.score.toString())
       }
     }.bind(this))
 
-    // Collisions between ship and enemies
     this.physics.add.overlap(this.ship, this.enemyGroup, function (shipCollide, enemyCollide) {
       this.sound.play('explosion')
       enemyCollide.destroy()
       this.lives--
       this.livesText.setText('Lives: ' + this.lives.toString())
 
-      // Reset everything when game ends
       if (this.lives <= 0) {
         this.physics.pause()
         this.sound.play('gameover')
-        enemyCollide.destroy()
         shipCollide.destroy()
         this.gameOverText = this.add.text(1920 / 2, 1080 / 2, 'Game Over!\nClick to play again.', this.gameOverTextStyle).setOrigin(0.5)
         this.gameOverText.setInteractive({ useHandCursor: true })
@@ -148,79 +130,60 @@ class GameScene extends Phaser.Scene {
         })
       }
     }.bind(this))
+
+    // Mouse click to shoot
+    this.input.on('pointerdown', (pointer) => {
+      if (this.lives <= 0) return
+
+      const aNewMissile = this.physics.add.sprite(this.ship.x, this.ship.y, 'missile')
+      this.missileGroup.add(aNewMissile)
+
+      this.sound.play('laser')
+
+      const dx = pointer.x - this.ship.x
+      const dy = pointer.y - this.ship.y
+      const angle = Math.atan2(dy, dx)
+
+      const missileSpeed = 1500
+      aNewMissile.body.velocity.x = Math.cos(angle) * missileSpeed
+      aNewMissile.body.velocity.y = Math.sin(angle) * missileSpeed
+      aNewMissile.rotation = angle
+    })
   }
 
   update (time, delta) {
-    // Get mouse pointer coordinates
     const pointer = this.input.activePointer
     const dx = pointer.x - this.ship.x
     const dy = pointer.y - this.ship.y
-
-    // Calculate angle from ship to mouse pointer
     const angle = Math.atan2(dy, dx)
 
-    // Rotate ship sprite to face mouse pointer
     this.ship.rotation = angle
 
     const keyUpObj = this.input.keyboard.addKey('W')
     const keyLeftObj = this.input.keyboard.addKey('A')
     const keyRightObj = this.input.keyboard.addKey('D')
     const keyDownObj = this.input.keyboard.addKey('S')
-    const keySpaceObj = this.input.keyboard.addKey('SPACE')
 
     if (keyLeftObj.isDown === true) {
       this.ship.x -= 15
-      if (this.ship.x < 0) {
-        this.ship.x = 0
-      }
+      if (this.ship.x < 0) this.ship.x = 0
     }
 
     if (keyRightObj.isDown === true) {
       this.ship.x += 15
-      if (this.ship.x > 1920) {
-        this.ship.x = 1920
-      }
+      if (this.ship.x > 1920) this.ship.x = 1920
     }
 
     if (keyUpObj.isDown === true) {
       this.ship.y -= 15
-      if (this.ship.y < 0) {
-        this.ship.y = 0
-      }
+      if (this.ship.y < 0) this.ship.y = 0
     }
 
     if (keyDownObj.isDown === true) {
       this.ship.y += 15
-      if (this.ship.y > 1080) {
-        this.ship.y = 1080
-      }
+      if (this.ship.y > 1080) this.ship.y = 1080
     }
 
-    if (keySpaceObj.isDown === true) {
-      if (this.fireMissile === false) {
-        this.fireMissile = true
-        // Create missile at ship's position
-        const aNewMissile = this.physics.add.sprite(this.ship.x, this.ship.y, 'missile')
-        this.missileGroup.add(aNewMissile)
-
-        // Play laser sound
-        this.sound.play('laser')
-
-        // Set missile velocity based on ship's rotation (angle)
-        const missileSpeed = 1500
-        aNewMissile.body.velocity.x = Math.cos(angle) * missileSpeed
-        aNewMissile.body.velocity.y = Math.sin(angle) * missileSpeed
-
-        // Optional: rotate missile to face moving direction
-        aNewMissile.rotation = angle
-      }
-    }
-
-    if (keySpaceObj.isUp === true) {
-      this.fireMissile = false
-    }
-
-    // Update missile positions and destroy if out of bounds
     this.missileGroup.children.each(function (missile) {
       if (
         missile.x < 0 || missile.x > 1920 ||
@@ -230,17 +193,14 @@ class GameScene extends Phaser.Scene {
       }
     })
 
-    // Make enemies move toward the player at a constant speed
     this.enemyGroup.children.each(function (enemy) {
       const dx = this.ship.x - enemy.x
       const dy = this.ship.y - enemy.y
       const angle = Math.atan2(dy, dx)
       const speed = enemy.speed
-
       enemy.body.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed)
     }, this)
 
-    // Check for enemies and progress waves if none are left
     if (this.enemyGroup.countActive(true) === 0) {
       this.waves++
       this.wavesText.setText('Wave: ' + this.waves)
