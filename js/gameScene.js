@@ -42,6 +42,7 @@ class GameScene extends Phaser.Scene {
     this.enemyGroup.add(anEnemy)
   }
 
+  // Spawn a increasing number of enemies per wave
   spawnWave (numEnemies) {
     for (let loopCounter = 0; loopCounter < numEnemies; loopCounter++) {
       this.createEnemy()
@@ -155,6 +156,7 @@ class GameScene extends Phaser.Scene {
     })
   }
 
+  // Update the game
   update (time, delta) {
     const pointer = this.input.activePointer
     const dx = pointer.x - this.ship.x
