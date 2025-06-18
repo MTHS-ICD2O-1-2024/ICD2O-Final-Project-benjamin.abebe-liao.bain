@@ -10,6 +10,7 @@
 class GameScene extends Phaser.Scene {
   // create enemy
   createEnemy () {
+    // Randomly generate the enemy's X location and velocity
     const enemyXLocation = Math.floor(Math.random() * 1920) + 1
     let enemyXVelocity = Math.floor(Math.random() * 50) + 1
     enemyXVelocity *= Math.round(Math.random()) ? 1 : -1
@@ -29,13 +30,16 @@ class GameScene extends Phaser.Scene {
     anEnemy.body.velocity.x = enemyXVelocity
 
     if (randomType === 1) {
+      // virus enemy
       anEnemy.hp = 1
       anEnemy.speed = 750
     } else if (randomType === 2) {
-      anEnemy.hp = 2
+      // malware enemy
+      anEnemy.hp = 3
       anEnemy.speed = 300
     } else {
-      anEnemy.hp = 3
+      // ransomware enemy
+      anEnemy.hp = 5
       anEnemy.speed = 150
     }
 
@@ -63,32 +67,41 @@ class GameScene extends Phaser.Scene {
     this.gameOverTextStyle = { font: '30px Arial', fill: '#ffffff', align: 'center' }
   }
 
+  // Initialize the scene
   init (data) {
     this.cameras.main.setBackgroundColor('#0x5f6e7a')
   }
 
+  // Preload assets for the game
   preload () {
     console.log('Game Scene')
+    // images
     this.load.image('gameOver', './assets/gameOver.png')
-    this.load.image('starBackground', './assets/background.png')
+    this.load.image('background', './assets/background.png')
     this.load.image('ship', './assets/antivirus.png')
     this.load.image('missile', './assets/lightningbolt.png')
     this.load.image('enemy', './assets/mal.png')
-    this.load.image('fastEnemy', '/assets/virus.png')
-    this.load.image('slowEnemy', '/assets/ransomware.png')
+    this.load.image('fastEnemy', './assets/virus.png')
+    this.load.image('slowEnemy', './assets/ransomware.png')
 
+    // audios
     this.load.audio('laser', './assets/laser.wav')
     this.load.audio('explosion', './assets/explosion.wav')
     this.load.audio('gameover', './assets/gameover.wav')
+    this.load.audio('backgroundMusic', './assets/backgroundMusic.wav')
   }
 
+  // Create the game scene
   create (data) {
-    this.background = this.add.image(0, 0, 'starBackground').setScale(2.0)
+    this.background = this.add.image(0, 0, 'background').setScale(2.0)
     this.background.setOrigin(0, 0)
 
     this.gameOverImage = this.add.image(1920 / 2, 1080 / 2, 'gameOver')
     this.gameOverImage.setOrigin(0.5, 0.5)
     this.gameOverImage.setVisible(false)
+
+    this.backgroundMusic = this.sound.add('backgroundMusic', { loop: true, volume: 0.5 })
+    this.backgroundMusic.play()
 
     this.wavesText = this.add.text(1650, 10, 'Wave: ' + this.waves.toString(), this.scoreTextStyle)
     this.scoreText = this.add.text(10, 10, 'Score: ' + this.score.toString(), this.scoreTextStyle)
@@ -122,6 +135,7 @@ class GameScene extends Phaser.Scene {
 
       if (this.lives <= 0) {
         this.physics.pause()
+        this.backgroundMusic.stop()
         this.sound.play('gameover')
         this.gameOverImage.setVisible(true)
         shipCollide.destroy()
